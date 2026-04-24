@@ -4,9 +4,9 @@
   "description": "Multi-agent orchestration harness for Claude Code — auto-routing, team spawning, iterative improvement",
   "plugins": [
     {
-      "name": "viper-plugin-cc",
+      "name": "viper",
       "description": "Viper orchestrate harness — Advisor routing + /viper-team + /self-improve + statusline",
-      "source": "./"
+      "source": "./plugins/viper"
     }
   ]
 }
