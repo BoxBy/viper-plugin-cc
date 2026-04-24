@@ -1,103 +1,87 @@
 # viper-plugin-cc
 
-Claude Code 용 Viper 오케스트레이트 하네스 — Claude Code 네이티브 프리미티브(`TeamCreate` / `SendMessage` / `Agent`) 기반 멀티에이전트 코딩 팀.
+[**한국어**](README_ko.md)
 
-[BoxBy/Viper](https://github.com/BoxBy/Viper/tree/develop)의 orchestrate harness를 Claude Code 플러그인 시스템에 이식.
+Claude Code orchestration harness built on native primitives (`TeamCreate` / `SendMessage` / `Agent`) — multi-agent coding team for Claude Code.
 
-## 왜 이 플러그인?
+Port of [Viper](https://github.com/BoxBy/Viper/tree/develop)'s orchestrate harness to the Claude Code plugin system.
 
-Claude Code 플러그인 시스템은 `skills/`, `agents/`, `hooks/` 는 자동 주입하지만 **`CLAUDE.md` 와 `rules/` 는 주입하지 않는다**. 이 플러그인이 그 gap 을 메운다:
+## Why this plugin?
 
-1. `references/CLAUDE.md` — 세션 시작 시 자동 로드될 Advisor instruction
-2. `references/rules/*.md` — `~/.claude/rules/` 에 있으면 자동 주입되는 rule 파일들
-3. `/harness-install` skill — 위 파일들을 `~/.claude/` 에 symlink/copy/guide 3-모드 중 선택 설치
+The Claude Code plugin system auto-injects `skills/`, `agents/`, and `hooks/`, but **not `CLAUDE.md` or `rules/`**. This plugin bridges that gap:
 
-설치 후 어느 프로젝트에서 Claude Code 를 켜도 동일한 routing 과 thinking 규약이 적용된다.
+1. `references/CLAUDE.md` — Advisor instruction auto-loaded at session start
+2. `references/rules/*.md` — Rule files injected from `~/.claude/rules/` when present
+3. `/harness-install` skill — Deploy the above to `~/.claude/` with symlink/copy/guide modes
 
-## 하는 일
+After installation, the same routing and thinking conventions apply across all Claude Code sessions.
 
-모든 Claude Code 세션에 **Tech Lead 스타일 Advisor**를 주입:
+## What it does
 
-- **전역 라우팅** — Lv 0-100 난이도 기반 위임 (trivial → Pi, standard → `/viper-team`, complex → `/viper-team --mode=full`, architecture → `/viper-team --mode=architecture`)
-- **`/viper-team` 스킬** — Claude Code 네이티브 `TeamCreate`로 architect/coder/debugger/reviewer 워커 스폰. Scale Mode: Full / Bug-Fix / Feature-Small / Refactor / Architecture
-- **`/self-improve` 스킬** — PRD 기반 반복 개선 3총사 (skill + worker + ralph 루프). 데이터 기반 연구 또는 스펙 기반 반복 개선.
-- **4-step 사고** — 분석 → 검증 → 자기수정 → 계획 (Lv 21+ 필수)
-- **실행 계약** — 증거 기반 "완료 선언" 게이트 (cross-verify, 인용, 근원 원인, 재발 방지)
-- **상태 표시줄** — 컨텍스트 사용량, 비용, 활성 팀 트리, PR 상태, Pi/Codex 속성
-- **`/harness-install` 스킬** — CLAUDE.md + rules/를 `~/.claude/`에 배포 (symlink/copy/guide 모드)
+Injects a **Tech Lead-style Advisor** into every Claude Code session:
 
-## 구조
+- **Global routing** — Lv 0-100 difficulty-based delegation (trivial → Pi, standard → `/viper-team`, complex → `/viper-team --mode=full`, architecture → `/viper-team --mode=architecture`)
+- **`/viper-team` skill** — Spawns architect/coder/debugger/reviewer workers via Claude Code native `TeamCreate`. Scale Modes: Full / Bug-Fix / Feature-Small / Refactor / Architecture
+- **`/self-improve` skill** — PRD-driven iterative improvement trio (skill + worker + ralph loop). Data-driven research or spec-based iterative refinement.
+- **4-step thinking** — Analysis → Verification → Self-Correction → Plan (mandatory for Lv 21+)
+- **Execution contract** — Evidence-based "declare done" gate (cross-verify, citations, root cause, recurrence prevention)
+- **Status line** — Context usage, cost, active team tree, PR status, Pi/Codex attribution
+- **`/harness-install` skill** — Deploy CLAUDE.md + rules/ to `~/.claude/` (symlink/copy/guide modes)
+
+## Structure
 
 ```
-.claude-plugin/plugin.json    플러그인 매니페스트
-agents/                       에이전트 정의
-  architect.md, coder.md        viper-team 워커
-  debugger.md, reviewer.md      viper-team 워커
-  ralph.md                      범용 루프 에이전트 (stop-hook 기반)
-  self-improving-agent.md       /self-improve 1회 반복 워커
-  self-improve-ralph.md         /self-improve 루프 (ralph.md thin wrapper)
+.claude-plugin/plugin.json    Plugin manifest
+agents/                       Agent definitions
+  architect.md, coder.md        viper-team workers
+  debugger.md, reviewer.md      viper-team workers
+  ralph.md                      General-purpose loop agent (stop-hook based)
+  self-improving-agent.md       /self-improve single-iteration worker
+  self-improve-ralph.md         /self-improve loop (ralph.md thin wrapper)
 references/
-  CLAUDE.md                   전역 Advisor 인스트럭션 (~/.claude/에 배포)
-  RTK.md                      RTK (Rust Token Killer) 사용 가이드
-  prd-template.md             /self-improve용 PRD 템플릿
-  rules/                      자동 주입 규칙 파일
-    advisor.md                Advisor 전용: routing, 4-step, anti-patterns, few-shot
+  CLAUDE.md                   Global Advisor instruction (deployed to ~/.claude/)
+  RTK.md                      RTK (Rust Token Killer) usage guide
+  prd-template.md             PRD template for /self-improve
+  rules/                      Auto-injected rule files
+    advisor.md                Advisor: routing, 4-step, anti-patterns, few-shot
     advisor-subagent.md       Subagent-first variant
-    worker.md                 Worker 전용: 팀 통신, 에스컬레이션
-    tool-fallback.md          Pi/Codex 부재 시 전환 + Pi Tier 라우팅
-    common/                   공통 규약 (12개: code-quality, ddd-layers 등)
-  team-bootstrap.md           각 팀 워커에 주입되는 공통 프로토콜
+    worker.md                 Worker: team communication, escalation
+    tool-fallback.md          Pi/Codex absence fallback + Pi Tier routing
+    common/                   Shared conventions (12: code-quality, ddd-layers, etc.)
+  team-bootstrap.md           Common protocol injected into each team worker
 bin/
   codex-cc                    Codex CLI wrapper (caller tracking, session resume)
 hooks/
-  hooks.json                  SessionStart + Stop hook 등록
-  ralph-stop-hook.sh          Ralph 루프 Stop hook
+  hooks.json                  SessionStart + Stop hook registration
+  ralph-stop-hook.sh          Ralph loop Stop hook
 scripts/
-  statusline.sh               Claude Code 상태 표시줄 진입점
-  format.sh                   상태 표시줄 ANSI 렌더링
-  plugin-update-check.sh      SessionStart 플러그인 업데이트 체크
+  statusline.sh               Claude Code status line entry point
+  format.sh                   Status line ANSI rendering
+  plugin-update-check.sh      SessionStart plugin update check
 skills/
-  harness-install/            설치 스킬 (/harness-install)
-  viper-team/                 팀 스폰 스킬 (/viper-team)
-  self-improve/               PRD 기반 반복 개선 (/self-improve)
-  update-plugins/             플러그인 자동 업데이트 (/update-plugins)
-tests/                        상태 표시줄 테스트 스위트
+  harness-install/            Install skill (/harness-install)
+  viper-team/                 Team spawn skill (/viper-team)
+  self-improve/               PRD-based iterative improvement (/self-improve)
+  update-plugins/             Plugin auto-update (/update-plugins)
+tests/                        Status line test suite
 ```
 
-## 구성
+## Installation
 
-| 구성 | 위치 | 역할 |
-|---|---|---|
-| `references/CLAUDE.md` | — | 글로벌 instruction (Role, Gate, Simplicity First, Surgical Changes, Goal-Driven) |
-| `references/RTK.md` | — | rtk(Rust Token Killer) hook 사용 가이드 |
-| `references/rules/advisor.md` | — | Advisor 전용: routing table, 4-step thinking, anti-patterns, few-shot, subagent token diet, tool fallback |
-| `references/rules/advisor-subagent.md` | — | Subagent-first variant (harness-install --harness-mode=subagent 시 선택) |
-| `references/rules/worker.md` | — | Worker 전용: 팀 통신 프로토콜, 에스컬레이션, worker anti-patterns |
-| `references/rules/tool-fallback.md` | — | Pi/Codex 부재 시 degrade 매핑 + Pi Tier (pi_tier) 조건부 라우팅 |
-| `references/rules/common/` | — | 공통 규약 (code-quality, ddd-layers, execution-contract, thinking-guidelines, ubiquitous-language, complexity-matrix, episodic-feedback, roles, tools-reference, agent-evolution, vibe-and-rigor) |
-| `skills/harness-install/SKILL.md` | — | 설치 skill — symlink/copy/guide 선택 + 모델 manifest 생성 |
-| `skills/viper-team/`, `skills/self-improve/`, `skills/update-plugins/` | — | 팀 스폰, PRD 기반 반복 개선, 플러그인 자동 업데이트 |
-| `hooks/hooks.json` | — | SessionStart (업데이트 체크) + Stop (Ralph 루프) hook |
-| `scripts/` | — | statusline, format, plugin-update-check |
-| `bin/codex-cc` | — | Codex CLI wrapper |
-| `tests/test_statusline.sh` | — | 상태 표시줄 테스트 스위트 |
-
-## 설치
-
-### Git 저장소에서 설치
+### Install from Git repository
 
 ```bash
 claude plugin install https://github.com/BoxBy/viper-plugin-cc
 ```
 
-### 수동 설치
+### Manual installation
 
 ```bash
 git clone https://github.com/BoxBy/viper-plugin-cc.git
 cd viper-plugin-cc
 ```
 
-`~/.claude/settings.json`에 플러그인 경로 추가:
+Add the plugin path to `~/.claude/settings.json`:
 
 ```json
 {
@@ -107,149 +91,149 @@ cd viper-plugin-cc
 }
 ```
 
-### 설치 후 설정
+### Post-install setup
 
-플러그인이 로드되면 Claude Code에서 harness install 스킬 실행:
+Once the plugin loads, run the harness install skill in Claude Code:
 
 ```bash
-/harness-install                      # 대화형 (AskUserQuestion 으로 모드 선택)
-/harness-install --mode=symlink       # 비대화, 권장 — 플러그인 업데이트 자동 반영
-/harness-install --mode=copy          # 물리 복사, 로컬 수정 보호됨
-/harness-install --mode=guide         # 아무것도 안 하고 수동 명령만 출력
-/harness-install --refresh-models     # 모델 manifest 만 재생성 (install 건너뜀)
+/harness-install                      # Interactive (mode selection via AskUserQuestion)
+/harness-install --mode=symlink       # Non-interactive, recommended — auto-reflects plugin updates
+/harness-install --mode=copy          # Physical copy, local edits protected
+/harness-install --mode=guide         # No-op, outputs manual commands only
+/harness-install --refresh-models     # Regenerate model manifest only (skip install)
 ```
 
-#### 모드 차이
+#### Mode differences
 
-- **Symlink (권장)** — `~/.claude/{CLAUDE.md, RTK.md, rules/*.md}` 를 플러그인 `references/*` 로 심볼릭 링크. 플러그인 업데이트시 자동 반영.
-- **Copy** — 물리 복사. 업데이트 시 `/harness-install` 재실행 필요.
-- **Guide only** — 아무것도 안 한다. 복붙 명령어만 출력.
+- **Symlink (recommended)** — Symlinks `~/.claude/{CLAUDE.md, RTK.md, rules/*.md}` to plugin `references/*`. Plugin updates are reflected automatically.
+- **Copy** — Physical copy. Requires re-running `/harness-install` on updates.
+- **Guide only** — Does nothing. Outputs copy-paste commands only.
 
-#### 백업
+#### Backup
 
-기존 `~/.claude/{CLAUDE.md, RTK.md, rules/}` 가 있으면 `~/.claude/.backup/<YYYYMMDD-HHMMSS>/` 로 이동 후 설치.
+Existing `~/.claude/{CLAUDE.md, RTK.md, rules/}` are moved to `~/.claude/.backup/<YYYYMMDD-HHMMSS>/` before installation.
 
-#### 모델 manifest 자동 resolve
+#### Model manifest auto-resolve
 
-install 시 `scripts/resolve-models.sh` 가:
-1. `ANTHROPIC_API_KEY` 있으면 `api.anthropic.com/v1/models` 조회 → family 별 최신 id
-2. 없으면 docs 페이지 fetch + HTML parse
-3. 둘 다 실패 시 DEFAULT 상수 + "수동 확인 필요" 경고
-4. codex 설치돼 있으면 `codex --help` 로 `--model`/`--effort` 플래그 지원 확인
+During install, `scripts/resolve-models.sh`:
+1. If `ANTHROPIC_API_KEY` is set → queries `api.anthropic.com/v1/models` → latest id per family
+2. Otherwise → fetches docs page + HTML parse
+3. If both fail → DEFAULT constants + "manual verification required" warning
+4. If codex is installed → checks `codex --help` for `--model`/`--effort` flag support
 
-결과는 `~/.claude/rules/model-manifest.md` 에 기록 (다른 plugin 들도 이 파일 `$LATEST_OPUS` 등 env 변수 참조).
+Results are written to `~/.claude/rules/model-manifest.md` (other plugins can reference `$LATEST_OPUS` etc. from this file).
 
-#### 가용성 캐시
+#### Availability cache
 
-install 마지막 단계에서 `~/.claude/rules/availability-cache.json` 생성 — `tool-fallback.md` 가 세션 시작 시 읽고 Pi/Codex/OMC 부재에 따라 routing 을 자동 degrade 한다.
+The final install step generates `~/.claude/rules/availability-cache.json` — `tool-fallback.md` reads this at session start and auto-degrades routing based on Pi/Codex/OMC presence.
 
-새 Claude Code 세션을 시작하면 활성화됩니다.
+Start a new Claude Code session to activate.
 
-## 사전 조건 — RTK 필수
+## Prerequisite — RTK Required
 
-**RTK (Rust Token Killer)** 는 설치 전제 조건. 선택 사항 아님.
+**RTK (Rust Token Killer)** is a mandatory prerequisite. Not optional.
 
 ```bash
-brew install rtk   # macOS/Linux, 권장
-# 또는
+brew install rtk   # macOS/Linux, recommended
+# or
 curl -fsSL https://raw.githubusercontent.com/rtk-ai/rtk/refs/heads/master/install.sh | sh
-# 또는
+# or
 cargo install --git https://github.com/rtk-ai/rtk
 
-rtk init -g        # Claude Code hook 설치 (PreToolUse)
+rtk init -g        # Install Claude Code hook (PreToolUse)
 ```
 
-설치 후 `rtk --version` 으로 확인. viper-plugin-cc 가 의존하는 것:
-- 모든 Bash 툴콜의 output 을 PreToolUse hook 에서 자동 token-diet — 60–90% 절감
-- `rtk gain` 으로 누적 절감량 확인
-- viper-plugin-cc 의 subagent-token-diet 규약이 RTK hook 주입을 전제로 설계됨 → RTK 없으면 bash output 이 plain 으로 흘러서 컨텍스트 폭발
+Verify with `rtk --version`. What viper-plugin-cc depends on:
+- Auto token-diet for all Bash tool output via PreToolUse hook — 60–90% savings
+- Check cumulative savings with `rtk gain`
+- The subagent-token-diet convention is designed assuming RTK hook injection → without RTK, bash output flows as plain text causing context explosion
 
-## 선택적 연동
+## Optional Integrations
 
-플러그인은 **독립 실행** 가능. 아래는 선택 사항:
+The plugin runs **standalone**. The following are optional:
 
-| 도구 | 용도 | 부재 시 동작 |
-|------|------|-------------|
-| [pi-plugin-cc](https://github.com/BoxBy/pi-plugin-cc) | 무료 Haiku 티어 교차 검증 (`pi-cc run`, `/pi:*` 스킬) | Haiku subagent fallback |
-| [codex-plugin-cc](https://github.com/openai/codex-plugin-cc) | GPT-5 교차 패밀리 검증 (`codex exec`, `/codex:*` 스킬) | Advisor self-review |
-| [ralph-loop](https://claude.com/ko-kr/plugins/ralph-loop) | 범용 에이전트 루프 (`/ralph`) — 내장 self-improve-ralph의 선택적 대안 | built-in `/loop` 대체 |
+| Tool | Purpose | Fallback when absent |
+|------|---------|---------------------|
+| [pi-plugin-cc](https://github.com/BoxBy/pi-plugin-cc) | Free Haiku-tier cross-verification (`pi-cc run`, `/pi:*` skills) | Haiku subagent fallback |
+| [codex-plugin-cc](https://github.com/openai/codex-plugin-cc) | GPT-5 cross-family verification (`codex exec`, `/codex:*` skills) | Advisor self-review |
+| [ralph-loop](https://claude.com/ko-kr/plugins/ralph-loop) | General-purpose agent loop (`/ralph`) — optional alternative to built-in self-improve-ralph | Built-in `/loop` fallback |
 
-`tool-fallback.md`가 자동 degrade 매핑을 제공. viper-plugin-cc는 Pi / Codex 없이도 전역 routing/4-step thinking 이 동작 — **단, RTK 만은 필수.**
+`tool-fallback.md` provides automatic degradation mappings. viper-plugin-cc works without Pi or Codex — **but RTK is mandatory.**
 
-## 반복 루프 실행 메커니즘 — `/loop` vs `/ralph` vs `ralph-loop`
+## Iterative Loop Execution — `/loop` vs `/ralph` vs `ralph-loop`
 
-`/self-improve` 같은 반복 루프 skill 을 돌릴 때 사용할 실행자는 3 가지:
+Three runners available for iterative loop skills like `/self-improve`:
 
-| 측면 | **built-in `/loop`** (기본값) | **OMC `/ralph`** | **`ralph-loop`** (Anthropic 공식) |
+| Aspect | **built-in `/loop`** (default) | **OMC `/ralph`** | **`ralph-loop`** (official) |
 |---|---|---|---|
-| 배포 | Claude Code 2.x 번들 skill | `oh-my-claudecode` 플러그인 | claude.com/plugins/ralph-loop (14만+ 설치) |
-| 재실행 메커니즘 | `ScheduleWakeup` 툴 | Stop hook "work is NOT done" 주입 | Stop hook 이 유저 prompt 재-feed + 파일 상태 보존 |
-| 종료 신호 | `ScheduleWakeup` 안 부르면 즉시 종료 | OMC circuit breaker / token budget | `--completion-promise` 문자열 |
-| "work is NOT done" 회귀 | 없음 | **있음** | 없음 (공식이라 더 엄밀) |
+| Distribution | Claude Code 2.x bundled skill | `oh-my-claudecode` plugin | claude.com/plugins/ralph-loop (140k+ installs) |
+| Re-exec mechanism | `ScheduleWakeup` tool | Stop hook "work is NOT done" injection | Stop hook re-feeds user prompt + file state preservation |
+| Termination signal | Not calling `ScheduleWakeup` = immediate stop | OMC circuit breaker / token budget | `--completion-promise` string |
+| "work is NOT done" regression | None | **Yes** | None (more rigorous, official) |
 
-**추천 경로**:
-1. 기본은 `/loop` — 별도 설치 불필요
-2. ralph persistence 패턴이 꼭 필요하면 `ralph-loop` (공식) 로 설치
-3. OMC `/ralph` 는 지양 — stop-hook 회귀 재현됨
+**Recommended path**:
+1. Default is `/loop` — no additional install needed
+2. If ralph persistence pattern is required, install `ralph-loop` (official)
+3. Avoid OMC `/ralph` — stop-hook regression reproduced
 
-## 핵심 개념
+## Key Concepts
 
-### Lv 기반 라우팅
+### Lv-based Routing
 
-| 난이도 | 실행자 | 리뷰어 |
-|--------|--------|--------|
-| Lv 1-20 (trivial) | Pi | Advisor 빠른 확인 |
-| Lv 21-50 (standard — 코드 작성) | `/viper-team` (Bug-Fix / Feature-Small / Refactor) | 팀 리뷰어 + Advisor |
-| Lv 51-80 (complex) | `/viper-team` (Refactor / Full) | 팀 리뷰어 + Advisor + `/codex:review` |
-| Lv 81+ (architecture) | `/viper-team --mode=architecture` (5명) | Opus critic + `/codex:adversarial-review` |
+| Difficulty | Executor | Reviewer |
+|------------|----------|----------|
+| Lv 1-20 (trivial) | Pi | Advisor quick check |
+| Lv 21-50 (standard — code writing) | `/viper-team` (Bug-Fix / Feature-Small / Refactor) | Team reviewer + Advisor |
+| Lv 51-80 (complex) | `/viper-team` (Refactor / Full) | Team reviewer + Advisor + `/codex:review` |
+| Lv 81+ (architecture) | `/viper-team --mode=architecture` (5 workers) | Opus critic + `/codex:adversarial-review` |
 
 ### Scale Mode (`/viper-team`)
 
-| 모드 | 워커 | 사용 시나리오 |
-|------|------|--------------|
-| **full** (기본) | architect, coder, debugger, reviewer | 복잡도 불명확 |
-| **bug-fix** | debugger, reviewer | 기존 동작 수정 |
-| **feature-small** | coder, reviewer | 단일 모듈에 기능 추가 |
-| **refactor** | architect, coder, reviewer | 구조 변경, 기능 유지 |
-| **architecture** | architect, coder×2, debugger, reviewer | 다중 모듈 설계 |
+| Mode | Workers | Use case |
+|------|---------|----------|
+| **full** (default) | architect, coder, debugger, reviewer | Unclear complexity |
+| **bug-fix** | debugger, reviewer | Fixing existing behavior |
+| **feature-small** | coder, reviewer | Adding feature to single module |
+| **refactor** | architect, coder, reviewer | Structural change, preserved functionality |
+| **architecture** | architect, coder×2, debugger, reviewer | Multi-module design |
 
-### 사용 예시
+### Usage Examples
 
 ```
-/viper-team '댓글 모듈 REST API 구현 — auth, CRUD, moderation'
-/viper-team --mode=bug-fix --rationale='페이지네이션 off-by-one' '페이지 카운트 수정'
-/viper-team --roles=coder,coder,reviewer --rationale='두 개의 독립 모듈' '인증 및 결제 구현'
+/viper-team 'Comment module REST API — auth, CRUD, moderation'
+/viper-team --mode=bug-fix --rationale='pagination off-by-one' 'Fix page count'
+/viper-team --roles=coder,coder,reviewer --rationale='two independent modules' 'Implement auth and payment'
 ```
 
 ### Self-Improve (`/self-improve`)
 
 ```bash
-# 1회 반복 (테스트)
+# Single iteration (test)
 /self-improve path/to/task_dir
 
-# 반복 루프 (내장 ralph)
-# self-improve-ralph 에이전트를 스폰하여 방향 검증 포함 자동 루프
+# Iterative loop (built-in ralph)
+# Spawns self-improve-ralph agent for auto-loop with direction verification
 
-# 공식 Ralph 플러그인 사용 시
-/ralph "/self-improve path/to/task_dir 를 반복. 목표 달성까지."
+# Using official Ralph plugin
+/ralph "Iterate /self-improve path/to/task_dir. Until goal achieved."
 
-# 대체 (Ralph 없음)
+# Alternative (no Ralph)
 /loop /self-improve path/to/task_dir
 ```
 
-## 핵심 규약 요약
+## Core Conventions Summary
 
-### Advisor 4-step thinking (Lv 21+ 필수)
+### Advisor 4-step thinking (mandatory for Lv 21+)
 
 1. Analysis (Lv 0~100 self-assess, WHY-check)
-2. Verification (knowledge gap, ambiguity LOW/MEDIUM/HIGH 분류)
+2. Verification (knowledge gap, ambiguity LOW/MEDIUM/HIGH classification)
 3. Self-Correction (critique + refine)
-4. Plan + **Ping-pong gate**: `codex exec "Review this plan: ... Critical issues only, ≤120 words"` → 반영 후 재제출
+4. Plan + **Ping-pong gate**: `codex exec "Review this plan: ... Critical issues only, ≤120 words"` → apply feedback → resubmit
 
 ### "Declare done" execution contract
 
-tool_use 로그 기반 4 프로파일 (code_change / research / file_task / text_answer). 각 프로파일은 read-before-write, WHY 인용, 테스트 실행 증거 등 체크박스로 VERIFIED / PARTIAL / BLOCKED 판정.
+Tool_use log-based 4 profiles (code_change / research / file_task / text_answer). Each profile has checkboxes for read-before-write, WHY citation, test execution evidence → VERIFIED / PARTIAL / BLOCKED verdict.
 
-## 라이선스
+## License
 
 AGPL-3.0
