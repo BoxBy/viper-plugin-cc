@@ -1,0 +1,12 @@
+{
+  "name": "viper",
+  "owner": "BoxBy",
+  "description": "Multi-agent orchestration harness for Claude Code — auto-routing, team spawning, iterative improvement",
+  "plugins": [
+    {
+      "name": "viper-plugin-cc",
+      "description": "Viper orchestrate harness — Advisor routing + /viper-team + /self-improve + statusline",
+      "source": "./"
+    }
+  ]
+}

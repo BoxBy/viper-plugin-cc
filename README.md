@@ -11,7 +11,9 @@ Port of [Viper](https://github.com/BoxBy/Viper/tree/develop)'s orchestrate harne
 **Step 1: Install**
 
 ```bash
-claude plugin install https://github.com/BoxBy/viper-plugin-cc
+/plugin marketplace add BoxBy/viper-plugin-cc
+/plugin install viper@viper-plugin-cc
+/reload-plugins
 ```
 
 **Step 2: Deploy harness**
@@ -100,13 +102,21 @@ tests/                        Status line test suite
 
 ## Installation
 
-### Install from Git repository
+### From marketplace (recommended)
+
+```bash
+/plugin marketplace add BoxBy/viper-plugin-cc
+/plugin install viper@viper-plugin-cc
+/reload-plugins
+```
+
+### From URL
 
 ```bash
 claude plugin install https://github.com/BoxBy/viper-plugin-cc
 ```
 
-### Manual installation
+### Manual
 
 ```bash
 git clone https://github.com/BoxBy/viper-plugin-cc.git
