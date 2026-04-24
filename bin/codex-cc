@@ -1,0 +1,107 @@
+#!/usr/bin/env bash
+# codex-cc: thin wrapper around `codex exec`
+# - Tracks caller via $CODEX_CC_CALLER (hook-injected) → ~/.codex-cc-tasks/.active/{caller}.json
+# - Auto-resumes prior session via ~/.codex-cc-tasks/.session (codex session-id)
+# - Same CLI contract as `codex exec`: args forwarded verbatim
+#
+# Usage:
+#   codex-cc exec "prompt"                # standard one-shot
+#   CODEX_CC_CALLER=coder codex-cc exec "..."   # caller-tracked
+#   codex-cc check                        # availability probe
+#
+# Env:
+#   CODEX_CC_TASK_DIR   override state dir (default ~/.codex-cc-tasks)
+#   CODEX_CC_SESSION_ID override session-id (skips file)
+#   CODEX_CC_NO_RESUME=1  force fresh session
+
+set -euo pipefail
+
+TASK_DIR="${CODEX_CC_TASK_DIR:-$HOME/.codex-cc-tasks}"
+SESSION_FILE="$TASK_DIR/.session"
+ACTIVE_DIR="$TASK_DIR/.active"
+
+mkdir -p "$TASK_DIR" "$ACTIVE_DIR"
+
+_check() {
+  if ! command -v codex >/dev/null 2>&1; then
+    echo "[codex-cc] codex CLI not found on PATH" >&2
+    echo "  install: npm install -g @openai/codex" >&2
+    return 1
+  fi
+  codex --version 2>/dev/null || true
+}
+
+_write_active() {
+  [ -z "${CODEX_CC_CALLER:-}" ] && return 0
+  # Defense-in-depth re-sanitize (hook already sanitizes, direct invocation
+  # bypasses hook): allowlist [A-Za-z0-9_.-], strip leading dots to block
+  # `..` path escape.
+  local caller
+  caller=$(printf '%s' "$CODEX_CC_CALLER" | sed 's/[^A-Za-z0-9_.-]//g' | sed 's/^\.*//')
+  [ -z "$caller" ] && return 0
+  # Include PID in filename so concurrent calls from the same caller
+  # don't stomp each other's sentinel. Statusline reads the `.caller` field
+  # from the JSON body, not the filename.
+  local file="$ACTIVE_DIR/${caller}.${$}.json"
+  printf '{"caller":"%s","pid":%d,"started":"%s"}\n' \
+    "$caller" "$$" "$(date -u +%Y-%m-%dT%H:%M:%SZ)" > "$file"
+  # shellcheck disable=SC2064
+  trap "rm -f '$file'" EXIT INT TERM
+}
+
+_resolve_resume() {
+  local sid="${CODEX_CC_SESSION_ID:-}"
+  if [ -z "$sid" ] && [ "${CODEX_CC_NO_RESUME:-0}" != "1" ] && [ -f "$SESSION_FILE" ]; then
+    sid=$(cat "$SESSION_FILE" 2>/dev/null || true)
+  fi
+  printf '%s' "$sid"
+}
+
+case "${1:-}" in
+  check)
+    _check
+    exit $?
+    ;;
+  ""|-h|--help)
+    cat <<'EOF'
+codex-cc: thin codex wrapper with caller tracking + session resume
+
+Usage:
+  codex-cc exec "prompt"        # one-shot, stdout = codex response
+  codex-cc check                # availability probe (exit 0 if ready)
+
+Env:
+  CODEX_CC_CALLER       caller name (hook-injected, written to .active/)
+  CODEX_CC_SESSION_ID   explicit session-id (overrides .session file)
+  CODEX_CC_NO_RESUME=1  force fresh session
+  CODEX_CC_TASK_DIR     state dir (default ~/.codex-cc-tasks)
+EOF
+    exit 0
+    ;;
+  exec)
+    shift
+    _check >/dev/null || exit 1
+    _write_active
+
+    resume_sid=$(_resolve_resume)
+    # Note: ~/.codex-cc-tasks/.session is populated manually today. Future
+    # enhancement: parse codex stdout for session-id and auto-write here.
+    # Until then, resume is only active if CODEX_CC_SESSION_ID env or .session
+    # file is set by the caller.
+    # IMPORTANT: we do NOT `exec` codex — `exec` replaces our shell process,
+    # skipping the EXIT trap and leaving a stale .active sentinel. Run as
+    # child so trap fires and removes the sentinel on completion.
+    if [ -n "$resume_sid" ]; then
+      codex exec --skip-git-repo-check --resume "$resume_sid" "$@"
+    else
+      codex exec --skip-git-repo-check "$@"
+    fi
+    exit $?
+    ;;
+  *)
+    # Forward unknown subcommands to codex as-is. No active sentinel was
+    # written for these paths, so `exec` is safe.
+    _check >/dev/null || exit 1
+    exec codex "$@"
+    ;;
+esac

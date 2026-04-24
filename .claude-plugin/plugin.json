@@ -1,0 +1,21 @@
+{
+  "name": "viper-plugin-cc",
+  "version": "0.3.2",
+  "description": "Viper Plugin CC — 전역 Advisor CLAUDE.md/rules + /viper-team 팀 스폰 (architect/coder/debugger/reviewer) + agent extension skills + statusline + /harness-install. Claude Code native primitives 기반, 외부 런타임 종속 없음.",
+  "keywords": [
+    "viper-plugin-cc",
+    "advisor",
+    "team",
+    "orchestration",
+    "multi-agent",
+    "statusline",
+    "claude-md",
+    "rules",
+    "routing",
+    "ddd"
+  ],
+  "author": {
+    "name": "wrtn-tech",
+    "team": "wrtn-tech"
+  }
+}
