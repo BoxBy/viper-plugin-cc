@@ -145,7 +145,7 @@ cd viper-plugin-cc
 ```json
 {
   "plugins": {
-    "viper-plugin-cc": "/path/to/viper-plugin-cc"
+    "viper": "/path/to/viper-plugin-cc"
   }
 }
 ```
@@ -198,7 +198,7 @@ install 마지막 단계에서 `~/.claude/rules/availability-cache.json` 생성 
 | [codex-plugin-cc](https://github.com/openai/codex-plugin-cc) | GPT-5 교차 패밀리 검증 (`codex exec`, `/codex:*` 스킬) | Advisor self-review |
 | [ralph-loop](https://claude.com/ko-kr/plugins/ralph-loop) | 범용 에이전트 루프 (`/ralph`) — 내장 self-improve-ralph의 선택적 대안 | built-in `/loop` 대체 |
 
-`tool-fallback.md`가 자동 degrade 매핑을 제공. viper-plugin-cc는 Pi / Codex 없이도 전역 routing/4-step thinking 이 동작한다.
+`tool-fallback.md`가 자동 degrade 매핑을 제공. viper는 Pi / Codex 없이도 전역 routing/4-step thinking 이 동작한다.
 
 ## 반복 루프 실행 메커니즘 — `/loop` vs `/ralph` vs `ralph-loop`
 

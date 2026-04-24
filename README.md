@@ -128,7 +128,7 @@ Add the plugin path to `~/.claude/settings.json`:
 ```json
 {
   "plugins": {
-    "viper-plugin-cc": "/path/to/viper-plugin-cc"
+    "viper": "/path/to/viper-plugin-cc"
   }
 }
 ```
@@ -181,7 +181,7 @@ The plugin runs **standalone**. The following are optional:
 | [codex-plugin-cc](https://github.com/openai/codex-plugin-cc) | GPT-5 cross-family verification (`codex exec`, `/codex:*` skills) | Advisor self-review |
 | [ralph-loop](https://claude.com/ko-kr/plugins/ralph-loop) | General-purpose agent loop (`/ralph`) — optional alternative to built-in self-improve-ralph | Built-in `/loop` fallback |
 
-`tool-fallback.md` provides automatic degradation mappings. viper-plugin-cc works without Pi or Codex.
+`tool-fallback.md` provides automatic degradation mappings. viper works without Pi or Codex.
 
 ## Iterative Loop Execution — `/loop` vs `/ralph` vs `ralph-loop`
 

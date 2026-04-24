@@ -1,17 +1,17 @@
 ---
 name: harness-install
-description: viper-plugin-cc 플러그인을 ~/.claude/ 에 설치. CLAUDE.md + RTK.md + rules/ + agents/*.md + skills/*/ 일괄 배포. symlink/copy/guide 3-모드 + 모델 manifest + statusline 포인터 + rtk ↔ pi-caller-inject hook 마이그레이션. 기존 파일은 ~/.claude/.backup/<ts>/ 로 백업.
+description: viper 플러그인을 ~/.claude/ 에 설치. CLAUDE.md + RTK.md + rules/ + agents/*.md + skills/*/ 일괄 배포. symlink/copy/guide 3-모드 + 모델 manifest + statusline 포인터 + rtk ↔ pi-caller-inject hook 마이그레이션. 기존 파일은 ~/.claude/.backup/<ts>/ 로 백업.
 user-invocable: true
 argument-hint: "[--refresh-models] [--apply-statusline] [--apply-hook-migration] [--mode=symlink|copy|guide] [--harness-mode=team|subagent]"
 ---
 
 # /harness-install
 
-viper-plugin-cc 플러그인이 가진 CLAUDE.md + RTK.md + rules/*.md + agents/*.md + skills/*/ 를 사용자 `~/.claude/` 에 설치한다. Claude Code 플러그인 시스템은 rules/ 와 CLAUDE.md 를 자동 주입하지 않고, agents/skills 는 global-scope 로 활용하려면 `~/.claude/` 위치가 필요하므로 수동 설치 스킬이 있다.
+viper 플러그인이 가진 CLAUDE.md + RTK.md + rules/*.md + agents/*.md + skills/*/ 를 사용자 `~/.claude/` 에 설치한다. Claude Code 플러그인 시스템은 rules/ 와 CLAUDE.md 를 자동 주입하지 않고, agents/skills 는 global-scope 로 활용하려면 `~/.claude/` 위치가 필요하므로 수동 설치 스킬이 있다.
 
 ## 사전 조건 — RTK 필수
 
-이 스킬은 **RTK (Rust Token Killer, [rtk-ai/rtk](https://github.com/rtk-ai/rtk))** 가 설치된 환경을 전제로 한다. viper-plugin-cc 가 참조하는 subagent-token-diet 규약이 RTK 의 PreToolUse hook 주입을 가정하므로, RTK 없으면 Bash 툴콜 output 이 plain 으로 흘러 컨텍스트 폭발을 일으킨다.
+이 스킬은 **RTK (Rust Token Killer, [rtk-ai/rtk](https://github.com/rtk-ai/rtk))** 가 설치된 환경을 전제로 한다. viper 가 참조하는 subagent-token-diet 규약이 RTK 의 PreToolUse hook 주입을 가정하므로, RTK 없으면 Bash 툴콜 output 이 plain 으로 흘러 컨텍스트 폭발을 일으킨다.
 
 설치 절차 (첫 실행 전 1 회):
 ```bash
@@ -46,7 +46,7 @@ rtk --version                 # 확인
   - `rules/advisor-subagent.md` → `~/.claude/rules/advisor.md` (이름 변환 설치)
   - `rules/worker.md` **미설치** (팀 워커 불필요)
   - `agents/*.md` **미설치** (팀 워커 불필요)
-  - 설치 후 주의: `/viper-team` 스킬은 `viper-plugin-cc` 플러그인에 번들로 남아있지만 subagent 모드의 Advisor 라우팅에서는 추천되지 않는다. Claude Code 는 skill-단위 disable 을 지원하지 않으므로 (PR #24 로 `viper-team` 독립 플러그인은 `viper-plugin-cc` 에 흡수됨) 무시하고 쓰거나, `viper-plugin-cc` 플러그인 자체를 disable 하면 rules/ 와 다른 skill 까지 함께 빠진다는 점에 유의.
+  - 설치 후 주의: `/viper-team` 스킬은 `viper` 플러그인에 번들로 남아있지만 subagent 모드의 Advisor 라우팅에서는 추천되지 않는다. Claude Code 는 skill-단위 disable 을 지원하지 않으므로 (PR #24 로 `viper-team` 독립 플러그인은 `viper` 에 흡수됨) 무시하고 쓰거나, `viper` 플러그인 자체를 disable 하면 rules/ 와 다른 skill 까지 함께 빠진다는 점에 유의.
 
 ## 사용법
 
@@ -70,7 +70,7 @@ rtk --version                 # 확인
 if ! command -v rtk >/dev/null 2>&1; then
   cat <<'EOF'
 [harness-install] ❌ RTK (Rust Token Killer) 가 설치돼 있지 않습니다.
-viper-plugin-cc 는 RTK 를 필수 의존으로 합니다 (subagent-token-diet 규약이 RTK hook 주입을 가정).
+viper 는 RTK 를 필수 의존으로 합니다 (subagent-token-diet 규약이 RTK hook 주입을 가정).
 
 설치:
   brew install rtk
@@ -279,7 +279,7 @@ EOF
 - **Model manifest**: `~/.claude/rules/model-manifest.md` (opus=<id>, sonnet=<id>, haiku=<id>, codex=<id|unavailable>) — guide 모드는 명령만 출력, 실제 생성은 사용자 직접 실행.
 - **Degraded tools** (없으면 생략): Pi / Codex / OMC 중 부재한 것
 - **다음 단계**: 새 Claude Code 세션 시작하면 CLAUDE.md + rules 자동 로드됨.
-  - subagent 모드: `/viper-team` 스킬은 `viper-plugin-cc` 번들에 남아있지만 Advisor 라우팅이 추천하지 않음. Claude Code 는 skill 단위 disable 을 지원하지 않으므로 별도 조치 불필요 (무시 가능).
+  - subagent 모드: `/viper-team` 스킬은 `viper` 번들에 남아있지만 Advisor 라우팅이 추천하지 않음. Claude Code 는 skill 단위 disable 을 지원하지 않으므로 별도 조치 불필요 (무시 가능).
   - guide 모드: stdout 에 출력된 명령을 사용자가 직접 실행해야 설치 완료.
 ```
 

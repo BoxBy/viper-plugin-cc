@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# install-copy.sh — viper-plugin-cc references 를 ~/.claude/ 로 물리 복사
+# install-copy.sh — viper references 를 ~/.claude/ 로 물리 복사
 # 기존 파일은 ~/.claude/.backup/<YYYYMMDD-HHMMSS>/ 로 이동
 #
 # Env vars:
@@ -162,7 +162,7 @@ else
   else
     echo "[install-copy] skip: agents/*.md (not used in subagent mode)"
   fi
-  echo "[install-copy] note: /viper-team skill is bundled in the viper-plugin-cc plugin (since PR #24 merged viper-team into viper-plugin-cc) and will not be recommended by Advisor routing in subagent mode. Claude Code does not support per-skill disable — just ignore it."
+  echo "[install-copy] note: /viper-team skill is bundled in the viper plugin (since PR #24 merged viper-team into viper) and will not be recommended by Advisor routing in subagent mode. Claude Code does not support per-skill disable — just ignore it."
 fi
 
 # ── Summary ───────────────────────────────────────────────────────────────────

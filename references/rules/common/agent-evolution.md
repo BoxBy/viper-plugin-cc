@@ -78,7 +78,7 @@ Reviews themselves are feedback-memory candidates (see `episodic-feedback.md`).
 
 ## Relationship to agent md files
 
-The agent md files (`plugins/viper-plugin-cc/agents/*.md`) are the **stable** description of a role — how the role should behave in general. This file is **corrective** — what to watch out for specifically.
+The agent md files (`plugins/viper/agents/*.md`) are the **stable** description of a role — how the role should behave in general. This file is **corrective** — what to watch out for specifically.
 
 If a tip in this file consistently changes worker output quality in a role, consider folding it into the role's agent md. Once folded in, delete it from here.
 
@@ -90,4 +90,4 @@ Keep this file short. If it's growing past ~20 tips, either roles are underspeci
 
 - [episodic-feedback.md](episodic-feedback.md) — per-session episodes; evolution tips are a slower distillation
 - [roles.md](roles.md) — role taxonomy for the "role" field
-- `plugins/viper-plugin-cc/agents/*.md` — the stable role descriptions that tips here supplement
+- `plugins/viper/agents/*.md` — the stable role descriptions that tips here supplement

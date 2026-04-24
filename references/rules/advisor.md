@@ -387,7 +387,7 @@ Detect when: `available-skills` has no `oh-my-claudecode:*` entries.
 | `/oh-my-claudecode:executor` / `:architect` / `:critic` / `:planner` | `subagent_type="general-purpose"` + `model=opus/sonnet/haiku` per role |
 | `/ralph` | Announce feature inactive → `/loop <interval> /self-improve <task>` (Claude Code built-in) |
 | `/autopilot`, `/ultrawork`, `/team` | Announce feature inactive. `TeamCreate` requires `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1`. Without the env var → plain parallel `Agent()` (shared task_list lost) |
-| `.omc/state/`, `.omc/notepad.md` | `.harness/state/`, `.harness/notepad.md` (viper-plugin-cc defaults) |
+| `.omc/state/`, `.omc/notepad.md` | `.harness/state/`, `.harness/notepad.md` (viper defaults) |
 
 ### Forbidden
 - When Pi is absent, **never simply skip** — Haiku/Sonnet fallback is required.

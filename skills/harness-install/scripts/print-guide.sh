@@ -17,7 +17,7 @@ esac
 
 cat <<EOF
 
-── viper-plugin-cc 수동 설치 가이드 (harness-mode=${HARNESS_MODE}) ──────────────────────────
+── viper 수동 설치 가이드 (harness-mode=${HARNESS_MODE}) ──────────────────────────
 
 아래 명령어를 직접 실행하세요. 기존 ~/.claude/ 파일을 덮어쓸 수 있으므로
 반드시 백업 후 진행하세요.
@@ -80,8 +80,8 @@ done
 ln -s "${CLAUDE_PLUGIN_ROOT}/references/rules/advisor-subagent.md" ~/.claude/rules/advisor.md
 
 # worker.md and agents/*.md are NOT installed in subagent mode.
-# /viper-team skill is bundled in the viper-plugin-cc plugin (since PR #24 merged
-# viper-team into viper-plugin-cc) and will not be recommended by Advisor routing
+# /viper-team skill is bundled in the viper plugin (since PR #24 merged
+# viper-team into viper) and will not be recommended by Advisor routing
 # in subagent mode. Claude Code does not support per-skill disable,
 # so no extra action needed — just ignore it.
 EOF

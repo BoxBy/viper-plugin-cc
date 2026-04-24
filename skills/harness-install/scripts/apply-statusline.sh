@@ -8,20 +8,20 @@ set -euo pipefail
 SETTINGS="${HOME}/.claude/settings.json"
 BACKUP="${SETTINGS}.backup-$(date -u +%Y%m%d-%H%M%S)"
 
-# Resolve statusline entrypoint. statusline 은 viper-plugin-cc plugin 내부 (scripts/
+# Resolve statusline entrypoint. statusline 은 viper plugin 내부 (scripts/
 # statusline.sh) 에 번들됨. Claude Code plugin cache 레이아웃:
 #   ~/.claude/plugins/cache/<marketplace>/<plugin>/<version>/scripts/statusline.sh
-# 우선순위: env override → 자기 plugin 내부 → marketplace cache (viper-plugin-cc plugin
+# 우선순위: env override → 자기 plugin 내부 → marketplace cache (viper plugin
 # 또는 legacy statusline 플러그인) → dev repo checkout.
 _find_statusline_script() {
   local candidates=()
   # 1. Env override (테스트 / 커스텀 레이아웃)
   [ -n "${STATUSLINE_SCRIPT:-}" ] && candidates+=("$STATUSLINE_SCRIPT")
-  # 2. 자기 plugin 내부 — $CLAUDE_PLUGIN_ROOT 가 viper-plugin-cc 를 가리키면 scripts/ 가 형제
+  # 2. 자기 plugin 내부 — $CLAUDE_PLUGIN_ROOT 가 viper 를 가리키면 scripts/ 가 형제
   [ -n "${CLAUDE_PLUGIN_ROOT:-}" ] && candidates+=("${CLAUDE_PLUGIN_ROOT}/scripts/statusline.sh")
-  # 3. Marketplace install: viper-plugin-cc plugin cache
+  # 3. Marketplace install: viper plugin cache
   local glob1 glob2
-  for glob1 in "$HOME/.claude/plugins/cache"/*/viper-plugin-cc/*/scripts/statusline.sh; do
+  for glob1 in "$HOME/.claude/plugins/cache"/*/viper/*/scripts/statusline.sh; do
     [ -f "$glob1" ] && candidates+=("$glob1")
   done
   # 4. Legacy — statusline 가 독립 plugin 이었을 때의 경로 (backwards compat)
@@ -29,7 +29,7 @@ _find_statusline_script() {
     [ -f "$glob2" ] && candidates+=("$glob2")
   done
   # 5. Dev: cwd-rooted repo checkout
-  candidates+=("$PWD/plugins/viper-plugin-cc/scripts/statusline.sh")
+  candidates+=("$PWD/plugins/viper/scripts/statusline.sh")
 
   for c in "${candidates[@]}"; do
     if [ -f "$c" ] && [ -x "$c" ]; then

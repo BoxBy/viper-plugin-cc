@@ -14,7 +14,7 @@ The user-global CLAUDE.md already describes *what* feedback memory is. This file
 
 ## The core idea
 
-Instead of a separate `.viper-plugin-cc/episodes/*.json` store (which would duplicate the native memory inject path and risk cache invalidation), we treat each **notable outcome** (failure, rework, surprise) as a feedback entry. The MEMORY.md inject that already runs at session start delivers these as "senior intuition" for free.
+Instead of a separate `.viper/episodes/*.json` store (which would duplicate the native memory inject path and risk cache invalidation), we treat each **notable outcome** (failure, rework, surprise) as a feedback entry. The MEMORY.md inject that already runs at session start delivers these as "senior intuition" for free.
 
 Native auto-memory gives us:
 - Session-start inject of all `feedback_*.md` entries — we don't need our own retrieval engine
@@ -141,7 +141,7 @@ If an entry could go in either `project` or `feedback`, ask: will this matter in
 
 ---
 
-## Why we did NOT build `.viper-plugin-cc/episodes/`
+## Why we did NOT build `.viper/episodes/`
 
 Considered and rejected (see `localdocs/learn.viper-review-2026-04-24.md` § 1.2):
 

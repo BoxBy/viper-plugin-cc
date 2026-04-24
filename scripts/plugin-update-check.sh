@@ -9,7 +9,7 @@
 #   1. SessionStart Claude transcript: `additionalContext` JSON on stdout.
 #   2. Statusline 2nd line: cache file written to
 #      ~/.claude/.cache/plugin-updates.txt with a compact one-line summary
-#      (e.g. "📦 updates: viper-plugin-cc 0.2.0→0.3.0, self-improve 0.2.0→0.3.0").
+#      (e.g. "📦 updates: viper 0.2.0→0.3.0, self-improve 0.2.0→0.3.0").
 #      statusline.sh reads it and renders below the main status line.
 #      Empty file (or missing) → no 2nd line. TTL 6h (mtime-based) to avoid
 #      showing stale notifications after the user ran /plugin update.
@@ -108,7 +108,7 @@ mkdir -p "$cache_dir" 2>/dev/null
 
 if [ -n "$out" ]; then
   # Transcript: full multi-line summary for Claude to surface in conversation.
-  summary='📦 Plugin updates available:'"$out"$'\nRun `/plugin update <plugin>@<marketplace>` to upgrade. For viper-plugin-cc, re-run `/harness-install --mode=symlink` after update to re-point ~/.claude/ symlinks at the new version.'
+  summary='📦 Plugin updates available:'"$out"$'\nRun `/plugin update <plugin>@<marketplace>` to upgrade. For viper, re-run `/harness-install --mode=symlink` after update to re-point ~/.claude/ symlinks at the new version.'
   jq -n --arg ctx "$summary" '{hookSpecificOutput: {hookEventName: "SessionStart", additionalContext: $ctx}}'
 
   # Statusline cache: compact comma-joined form. "  • NAME@MKT: X → Y" rows
@@ -120,11 +120,11 @@ if [ -n "$out" ]; then
     | sed -n 's|^  • \([^@]*\)@[^:]*: \([^ ]*\) → \([^ ]*\).*|\1 \2→\3|p' \
     | paste -sd ',' - \
     | sed 's/,/, /g')
-  # Single user-facing action hint. /viper-plugin-cc:update-plugins handles the entire
-  # upgrade flow (per-plugin /plugin update + harness-install re-link for viper-plugin-cc
+  # Single user-facing action hint. /viper:update-plugins handles the entire
+  # upgrade flow (per-plugin /plugin update + harness-install re-link for viper
   # + cache rebuild) so we never tell users to run /plugin update directly
   # from the statusline.
-  printf 'updates: %s — /viper-plugin-cc:update-plugins' "$compact" > "$cache_file"
+  printf 'updates: %s — /viper:update-plugins' "$compact" > "$cache_file"
 else
   # No updates: clear cache so statusline stops showing stale notice.
   : > "$cache_file"

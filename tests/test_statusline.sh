@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Test suite for plugins/viper-plugin-cc/scripts/statusline.sh + format.sh
+# Test suite for plugins/viper/scripts/statusline.sh + format.sh
 #
 # Uses a private $HOME sandbox so real ~/.claude is never touched.
 

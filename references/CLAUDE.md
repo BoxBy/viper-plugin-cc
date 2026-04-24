@@ -42,7 +42,7 @@ Your system prompt's first line identifies your role. Detect it, then apply **on
 
 ---
 
-This file is the **single source of truth** for Advisor behavior. Claude Code native primitives (`TeamCreate` / `SendMessage` / `TaskCreate` / `TaskUpdate` / `Agent`) + `/viper-team` skill (bundled in the `viper-plugin-cc` plugin — 과거 `viper-team` 별도 플러그인은 PR #24 에서 `viper-plugin-cc` 로 흡수됨) form the base orchestration layer. Pi and Codex are self-service tools invoked from Bash (`pi-cc run` / `codex-cc exec`) or via `/pi:*` / `/codex:*` skills. **OMC is not required** — all routing below uses native primitives.
+This file is the **single source of truth** for Advisor behavior. Claude Code native primitives (`TeamCreate` / `SendMessage` / `TaskCreate` / `TaskUpdate` / `Agent`) + `/viper-team` skill (bundled in the `viper` plugin — 과거 `viper-team` 별도 플러그인은 PR #24 에서 `viper` 로 흡수됨) form the base orchestration layer. Pi and Codex are self-service tools invoked from Bash (`pi-cc run` / `codex-cc exec`) or via `/pi:*` / `/codex:*` skills. **OMC is not required** — all routing below uses native primitives.
 
 <!-- User customizations -->
 # Harness Integration (Dynamic Agent Creation)
@@ -53,13 +53,13 @@ Apply when `/viper-team` needs additional roles, when the user asks for agent cr
 4. Orchestrator skill → `.claude/skills/{name}/SKILL.md` if needed
 5. 2+ agents w/ collab → TeamCreate; solo → Agent()
 
-Claude Code native `general-purpose` / `Explore` / `Plan` subagents used as-is for standard tasks; the `viper-plugin-cc` plugin only adds project-specific roles (the `/viper-team` skill's architect / coder / debugger / reviewer workers).
+Claude Code native `general-purpose` / `Explore` / `Plan` subagents used as-is for standard tasks; the `viper` plugin only adds project-specific roles (the `/viper-team` skill's architect / coder / debugger / reviewer workers).
 
 # Global Rules & Skills
 
 `~/.claude/rules/` (자동 주입) — 파일 구성과 내용은 본 파일 최상단의 **Rule index** 를 SSOT 로 본다. 중복 서술 금지.
 
-`~/.claude/skills/` (viper-plugin-cc bundled) — `/viper-team`, `/self-improve`, `/harness-install`, `/update-plugins`
+`~/.claude/skills/` (viper bundled) — `/viper-team`, `/self-improve`, `/harness-install`, `/update-plugins`
 
 > CLAUDE.md 는 2026-04-20 에 top-level 2 gates + Role/§1-§6 + Plugin integration 만 남기고 나머지는 rules/ 로 분리. 이후 2026-04-23 role-split 으로 rules/ 내부를 `advisor.md` / `worker.md` / `common/*` 3-way 로 재정비. 전체 내용은 여전히 세션마다 자동 주입됨.
 

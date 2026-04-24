@@ -45,7 +45,7 @@ Incorporate the output into your own answer; do not relay verbatim to peers.
 
 ## Quality Gate
 
-- Before `TaskUpdate(status="completed")`: call `pi-cc run "verify this diff: ..."` (mandatory per viper-plugin-cc CLAUDE.md rules)
+- Before `TaskUpdate(status="completed")`: call `pi-cc run "verify this diff: ..."` (mandatory per viper CLAUDE.md rules)
 - Reviewer gates closure with `🟢`/`🔴` verdict; max 2 review rounds before escalating via `TaskCreate` (DECISION NEEDED)
 
 ## Prompt Caching
