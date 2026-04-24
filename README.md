@@ -6,6 +6,49 @@ Claude Code orchestration harness built on native primitives (`TeamCreate` / `Se
 
 Port of [Viper](https://github.com/BoxBy/Viper/tree/develop)'s orchestrate harness to the Claude Code plugin system.
 
+## Quick Start
+
+**Step 1: Install**
+
+```bash
+claude plugin install https://github.com/BoxBy/viper-plugin-cc
+```
+
+**Step 2: Deploy harness**
+
+```bash
+/harness-install
+```
+
+**Step 3: Just use Claude Code**
+
+```
+Fix the pagination bug in the comment module
+```
+
+That's it. The Advisor auto-detects task difficulty and orchestrates accordingly — no special commands needed.
+
+### How it works under the hood
+
+| What you type | What happens |
+|---|---|
+| "Fix this typo" (trivial) | Advisor handles directly → done |
+| "Add login API" (standard) | Advisor → `/viper-team --mode=feature-small` (coder + reviewer) |
+| "Refactor the auth module" (complex) | Advisor → `/viper-team --mode=refactor` (architect + coder + reviewer) |
+| "Design the payment system" (architecture) | Advisor → `/viper-team --mode=architecture` (5 workers) |
+
+Every code change is automatically cross-verified (Pi + Codex when available), and the Advisor applies 4-step thinking for non-trivial tasks. You don't need to know any of this — just describe what you want.
+
+### Explicit commands (optional)
+
+Power users can bypass auto-routing:
+
+```
+/viper-team 'Comment module REST API — auth, CRUD, moderation'
+/viper-team --mode=bug-fix --rationale='pagination off-by-one' 'Fix page count'
+/self-improve path/to/task_dir
+```
+
 ## Why this plugin?
 
 The Claude Code plugin system auto-injects `skills/`, `agents/`, and `hooks/`, but **not `CLAUDE.md` or `rules/`**. This plugin bridges that gap:
