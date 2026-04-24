@@ -49,16 +49,6 @@ Power users can bypass auto-routing:
 /self-improve path/to/task_dir
 ```
 
-## Why this plugin?
-
-The Claude Code plugin system auto-injects `skills/`, `agents/`, and `hooks/`, but **not `CLAUDE.md` or `rules/`**. This plugin bridges that gap:
-
-1. `references/CLAUDE.md` — Advisor instruction auto-loaded at session start
-2. `references/rules/*.md` — Rule files injected from `~/.claude/rules/` when present
-3. `/harness-install` skill — Deploy the above to `~/.claude/` with symlink/copy/guide modes
-
-After installation, the same routing and thinking conventions apply across all Claude Code sessions.
-
 ## What it does
 
 Injects a **Tech Lead-style Advisor** into every Claude Code session:
@@ -83,7 +73,6 @@ agents/                       Agent definitions
   self-improve-ralph.md         /self-improve loop (ralph.md thin wrapper)
 references/
   CLAUDE.md                   Global Advisor instruction (deployed to ~/.claude/)
-  RTK.md                      RTK (Rust Token Killer) usage guide
   prd-template.md             PRD template for /self-improve
   rules/                      Auto-injected rule files
     advisor.md                Advisor: routing, 4-step, anti-patterns, few-shot
@@ -148,13 +137,13 @@ Once the plugin loads, run the harness install skill in Claude Code:
 
 #### Mode differences
 
-- **Symlink (recommended)** — Symlinks `~/.claude/{CLAUDE.md, RTK.md, rules/*.md}` to plugin `references/*`. Plugin updates are reflected automatically.
+- **Symlink (recommended)** — Symlinks `~/.claude/{CLAUDE.md, rules/*.md}` to plugin `references/*`. Plugin updates are reflected automatically.
 - **Copy** — Physical copy. Requires re-running `/harness-install` on updates.
 - **Guide only** — Does nothing. Outputs copy-paste commands only.
 
 #### Backup
 
-Existing `~/.claude/{CLAUDE.md, RTK.md, rules/}` are moved to `~/.claude/.backup/<YYYYMMDD-HHMMSS>/` before installation.
+Existing `~/.claude/{CLAUDE.md, rules/}` are moved to `~/.claude/.backup/<YYYYMMDD-HHMMSS>/` before installation.
 
 #### Model manifest auto-resolve
 
@@ -172,25 +161,6 @@ The final install step generates `~/.claude/rules/availability-cache.json` — `
 
 Start a new Claude Code session to activate.
 
-## Prerequisite — RTK Required
-
-**RTK (Rust Token Killer)** is a mandatory prerequisite. Not optional.
-
-```bash
-brew install rtk   # macOS/Linux, recommended
-# or
-curl -fsSL https://raw.githubusercontent.com/rtk-ai/rtk/refs/heads/master/install.sh | sh
-# or
-cargo install --git https://github.com/rtk-ai/rtk
-
-rtk init -g        # Install Claude Code hook (PreToolUse)
-```
-
-Verify with `rtk --version`. What viper-plugin-cc depends on:
-- Auto token-diet for all Bash tool output via PreToolUse hook — 60–90% savings
-- Check cumulative savings with `rtk gain`
-- The subagent-token-diet convention is designed assuming RTK hook injection → without RTK, bash output flows as plain text causing context explosion
-
 ## Optional Integrations
 
 The plugin runs **standalone**. The following are optional:
@@ -201,7 +171,7 @@ The plugin runs **standalone**. The following are optional:
 | [codex-plugin-cc](https://github.com/openai/codex-plugin-cc) | GPT-5 cross-family verification (`codex exec`, `/codex:*` skills) | Advisor self-review |
 | [ralph-loop](https://claude.com/ko-kr/plugins/ralph-loop) | General-purpose agent loop (`/ralph`) — optional alternative to built-in self-improve-ralph | Built-in `/loop` fallback |
 
-`tool-fallback.md` provides automatic degradation mappings. viper-plugin-cc works without Pi or Codex — **but RTK is mandatory.**
+`tool-fallback.md` provides automatic degradation mappings. viper-plugin-cc works without Pi or Codex.
 
 ## Iterative Loop Execution — `/loop` vs `/ralph` vs `ralph-loop`
 

@@ -49,16 +49,6 @@ claude plugin install https://github.com/BoxBy/viper-plugin-cc
 /self-improve path/to/task_dir
 ```
 
-## 왜 이 플러그인?
-
-Claude Code 플러그인 시스템은 `skills/`, `agents/`, `hooks/` 는 자동 주입하지만 **`CLAUDE.md` 와 `rules/` 는 주입하지 않는다**. 이 플러그인이 그 gap 을 메운다:
-
-1. `references/CLAUDE.md` — 세션 시작 시 자동 로드될 Advisor instruction
-2. `references/rules/*.md` — `~/.claude/rules/` 에 있으면 자동 주입되는 rule 파일들
-3. `/harness-install` skill — 위 파일들을 `~/.claude/` 에 symlink/copy/guide 3-모드 중 선택 설치
-
-설치 후 어느 프로젝트에서 Claude Code 를 켜도 동일한 routing 과 thinking 규약이 적용된다.
-
 ## 하는 일
 
 모든 Claude Code 세션에 **Tech Lead 스타일 Advisor**를 주입:
@@ -83,7 +73,6 @@ agents/                       에이전트 정의
   self-improve-ralph.md         /self-improve 루프 (ralph.md thin wrapper)
 references/
   CLAUDE.md                   전역 Advisor 인스트럭션 (~/.claude/에 배포)
-  RTK.md                      RTK (Rust Token Killer) 사용 가이드
   prd-template.md             /self-improve용 PRD 템플릿
   rules/                      자동 주입 규칙 파일
     advisor.md                Advisor 전용: routing, 4-step, anti-patterns, few-shot
@@ -114,7 +103,6 @@ tests/                        상태 표시줄 테스트 스위트
 | 구성 | 위치 | 역할 |
 |---|---|---|
 | `references/CLAUDE.md` | — | 글로벌 instruction (Role, Gate, Simplicity First, Surgical Changes, Goal-Driven) |
-| `references/RTK.md` | — | rtk(Rust Token Killer) hook 사용 가이드 |
 | `references/rules/advisor.md` | — | Advisor 전용: routing table, 4-step thinking, anti-patterns, few-shot, subagent token diet, tool fallback |
 | `references/rules/advisor-subagent.md` | — | Subagent-first variant (harness-install --harness-mode=subagent 시 선택) |
 | `references/rules/worker.md` | — | Worker 전용: 팀 통신 프로토콜, 에스컬레이션, worker anti-patterns |
@@ -166,13 +154,13 @@ cd viper-plugin-cc
 
 #### 모드 차이
 
-- **Symlink (권장)** — `~/.claude/{CLAUDE.md, RTK.md, rules/*.md}` 를 플러그인 `references/*` 로 심볼릭 링크. 플러그인 업데이트시 자동 반영.
+- **Symlink (권장)** — `~/.claude/{CLAUDE.md, rules/*.md}` 를 플러그인 `references/*` 로 심볼릭 링크. 플러그인 업데이트시 자동 반영.
 - **Copy** — 물리 복사. 업데이트 시 `/harness-install` 재실행 필요.
 - **Guide only** — 아무것도 안 한다. 복붙 명령어만 출력.
 
 #### 백업
 
-기존 `~/.claude/{CLAUDE.md, RTK.md, rules/}` 가 있으면 `~/.claude/.backup/<YYYYMMDD-HHMMSS>/` 로 이동 후 설치.
+기존 `~/.claude/{CLAUDE.md, rules/}` 가 있으면 `~/.claude/.backup/<YYYYMMDD-HHMMSS>/` 로 이동 후 설치.
 
 #### 모델 manifest 자동 resolve
 
@@ -190,25 +178,6 @@ install 마지막 단계에서 `~/.claude/rules/availability-cache.json` 생성 
 
 새 Claude Code 세션을 시작하면 활성화됩니다.
 
-## 사전 조건 — RTK 필수
-
-**RTK (Rust Token Killer)** 는 설치 전제 조건. 선택 사항 아님.
-
-```bash
-brew install rtk   # macOS/Linux, 권장
-# 또는
-curl -fsSL https://raw.githubusercontent.com/rtk-ai/rtk/refs/heads/master/install.sh | sh
-# 또는
-cargo install --git https://github.com/rtk-ai/rtk
-
-rtk init -g        # Claude Code hook 설치 (PreToolUse)
-```
-
-설치 후 `rtk --version` 으로 확인. viper-plugin-cc 가 의존하는 것:
-- 모든 Bash 툴콜의 output 을 PreToolUse hook 에서 자동 token-diet — 60–90% 절감
-- `rtk gain` 으로 누적 절감량 확인
-- viper-plugin-cc 의 subagent-token-diet 규약이 RTK hook 주입을 전제로 설계됨 → RTK 없으면 bash output 이 plain 으로 흘러서 컨텍스트 폭발
-
 ## 선택적 연동
 
 플러그인은 **독립 실행** 가능. 아래는 선택 사항:
@@ -219,7 +188,7 @@ rtk init -g        # Claude Code hook 설치 (PreToolUse)
 | [codex-plugin-cc](https://github.com/openai/codex-plugin-cc) | GPT-5 교차 패밀리 검증 (`codex exec`, `/codex:*` 스킬) | Advisor self-review |
 | [ralph-loop](https://claude.com/ko-kr/plugins/ralph-loop) | 범용 에이전트 루프 (`/ralph`) — 내장 self-improve-ralph의 선택적 대안 | built-in `/loop` 대체 |
 
-`tool-fallback.md`가 자동 degrade 매핑을 제공. viper-plugin-cc는 Pi / Codex 없이도 전역 routing/4-step thinking 이 동작 — **단, RTK 만은 필수.**
+`tool-fallback.md`가 자동 degrade 매핑을 제공. viper-plugin-cc는 Pi / Codex 없이도 전역 routing/4-step thinking 이 동작한다.
 
 ## 반복 루프 실행 메커니즘 — `/loop` vs `/ralph` vs `ralph-loop`
 
